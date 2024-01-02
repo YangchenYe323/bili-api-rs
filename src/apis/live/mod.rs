@@ -2,3 +2,4 @@
 
 pub mod user;
 pub mod msg;
+pub mod info;
