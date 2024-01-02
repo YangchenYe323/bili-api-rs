@@ -40,7 +40,7 @@ pub struct MedalItem {
   pub today_feed: i32,
   pub roomid: i32,
   pub status: i32,
-  pub target_id: i32,
+  pub target_id: i64,
   pub target_name: String,
   pub uname: String,
 }
