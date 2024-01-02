@@ -51,7 +51,7 @@ pub struct PageInfo {
   pub cur_page: i32,
 }
 
-pub fn get_medal_for_user<T: BiliClient>(client: T, page_size: u32, num_page: u32, raw_cookie: &str) -> std::result::Result<GetMedalForUserResponse, <T::Request as BiliApiRequest>::Error> {
+pub fn get_medal_for_user<T: BiliClient>(client: &T, page_size: i32, num_page: i32, raw_cookie: &str) -> std::result::Result<GetMedalForUserResponse, <T::Request as BiliApiRequest>::Error> {
   const API_URL: &str = "https://api.live.bilibili.com/xlive/app-ucenter/v1/user/GetMyMedals";
   let url = format!("{}?page={}&page_size={}", API_URL, num_page, page_size);
   let request = client.create_request("GET", &url).set_header("cookie", raw_cookie);
@@ -68,7 +68,7 @@ pub struct WearMedalResponse {
 }
 
 pub fn wear_medal<T: BiliClient>(
-  client: T, 
+  client: &T, 
   medal_id: i32, 
   csrf: &str, 
   csrf_token: &str,
@@ -89,7 +89,7 @@ pub struct LiveCheckinResponse {
 }
 
 pub fn live_checkin<T: BiliClient>(
-  client: T,
+  client: &T,
   raw_cookie: &str
 ) -> std::result::Result<LiveCheckinResponse, <T::Request as BiliApiRequest>::Error> {
   const API_URL: &str = "https://api.live.bilibili.com/xlive/web-ucenter/v1/sign/DoSign";
@@ -125,7 +125,7 @@ pub struct MonthlyLiveCheckinInfoData {
 }
 
 pub fn get_monthly_live_checkin_info<T: BiliClient>(
-  client: T,
+  client: &T,
   raw_cookie: &str
 ) -> std::result::Result<MonthlyLiveCheckinInfoResponse, <T::Request as BiliApiRequest>::Error> {
   const API_URL: &str = "https://api.live.bilibili.com/xlive/web-ucenter/v1/sign/WebGetSignInfo";
@@ -154,7 +154,7 @@ pub struct LastMonthLiveCheckInData {
 }
 
 pub fn get_last_month_live_checkin_info<T: BiliClient>(
-  client: T,
+  client: &T,
   raw_cookie: &str
 ) -> std::result::Result<LastMonthLiveCheckInInfoResponse, <T::Request as BiliApiRequest>::Error> {
   const API_URL: &str = "https://api.live.bilibili.com/sign/getLastMonthSignDays";
@@ -164,8 +164,39 @@ pub fn get_last_month_live_checkin_info<T: BiliClient>(
   Ok(response.deserialize_json().unwrap())
 }
 
-#[test]
-fn test() {
-  let agent = ureq::agent();
-  println!("{:?}", get_last_month_live_checkin_info(agent, "ABCDSEF"));
+#[derive(Debug, Deserialize)]
+pub struct GetInfoByUserResponse {
+  pub code: i32,
+  pub message: String,
+  pub ttl: i32,
+  pub data: GetInfoByUserData,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GetInfoByUserData {
+  pub property: UserLiveRoomProperty,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UserLiveRoomProperty {
+  pub bubble: i32,
+  pub bubble_color: String,
+  pub danmu: UserDanmuProperty,
+  pub uname_color: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UserDanmuProperty {
+  pub color: i32,
+  pub length: i32,
+  pub mode: i32,
+  pub room_id: i32,
+}
+
+pub fn get_live_info_by_user<T: BiliClient>(client: &T, room_id: i32, raw_cookie: &str) -> std::result::Result<GetInfoByUserResponse, <T::Request as BiliApiRequest>::Error> {
+  const API_URL: &str = "https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser";
+  let url = format!("{}?room_id={}", API_URL, room_id);
+  let request = client.create_request("GET", &url);
+  let response = request.set_header("cookie", raw_cookie).execute()?;
+  Ok(response.deserialize_json().unwrap())
 }
