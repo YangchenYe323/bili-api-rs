@@ -2,9 +2,8 @@
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use reqwest::blocking::{Client, Response};
 use serde::Deserialize;
-
-use crate::{BiliApiRequest, BiliApiResponse, BiliClient};
 
 #[derive(Debug)]
 pub struct LiveMessageFormContent {
@@ -41,8 +40,8 @@ pub struct SendLiveMessageModeInfo {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn send_live_message<T: BiliClient>(
-    client: &T,
+pub fn send_live_message(
+    client: &Client,
     room_id: i32,     // 直播间id
     msg: &str,        // 弹幕内容
     color: i32,       // 弹幕颜色
@@ -51,7 +50,7 @@ pub fn send_live_message<T: BiliClient>(
     bubble: i32,      // 气泡 (1)
     csrf: &str,       // cookie bili_jct字段
     raw_cookie: &str, // SESSDATA
-) -> std::result::Result<SendLiveMessageResponse, <T::Request as BiliApiRequest>::Error> {
+) -> std::result::Result<SendLiveMessageResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/msg/send";
     let rnd = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -69,9 +68,6 @@ pub fn send_live_message<T: BiliClient>(
         ("csrf", csrf),
         ("csrf_token", csrf),
     ];
-    let request = client
-        .create_request("POST", API_URL)
-        .set_header("cookie", raw_cookie);
-    let response = request.execute_post_form(&form)?;
-    Ok(response.deserialize_json().unwrap())
+    let request = client.post(API_URL).header("cookie", raw_cookie).form(&form).build()?;
+    client.execute(request).and_then(Response::json)
 }

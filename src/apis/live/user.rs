@@ -1,9 +1,8 @@
 //! Please refer to `https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/live/user.md`
 //! for API documentation.
 
+use reqwest::blocking::{Client, Response};
 use serde::Deserialize;
-
-use crate::{BiliApiRequest, BiliApiResponse, BiliClient};
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
@@ -57,19 +56,16 @@ pub struct PageInfo {
     pub cur_page: i32,
 }
 
-pub fn get_medal_for_user<T: BiliClient>(
-    client: &T,
+pub fn get_medal_for_user(
+    client: &Client,
     page_size: i32,
     num_page: i32,
     raw_cookie: &str,
-) -> std::result::Result<GetMedalForUserResponse, <T::Request as BiliApiRequest>::Error> {
+) -> std::result::Result<GetMedalForUserResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/xlive/app-ucenter/v1/user/GetMyMedals";
     let url = format!("{}?page={}&page_size={}", API_URL, num_page, page_size);
-    let request = client
-        .create_request("GET", &url)
-        .set_header("cookie", raw_cookie);
-    let response = request.execute()?;
-    Ok(response.deserialize_json().unwrap())
+    let request = client.get(&url).header("cookie", raw_cookie).build()?;
+    client.execute(request).and_then(Response::json)
 }
 
 #[derive(Debug, Deserialize)]
@@ -80,24 +76,26 @@ pub struct WearMedalResponse {
     // data field is often empty
 }
 
-pub fn wear_medal<T: BiliClient>(
-    client: &T,
+pub fn wear_medal(
+    client: &Client,
     medal_id: i32,
     csrf: &str,
     csrf_token: &str,
     raw_cookie: &str,
-) -> std::result::Result<WearMedalResponse, <T::Request as BiliApiRequest>::Error> {
+) -> std::result::Result<WearMedalResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/xlive/web-room/v1/fansMedal/wear";
     let params = [
         ("medal_id", &*medal_id.to_string()),
         ("csrf", csrf),
         ("csrf_token", csrf_token),
     ];
-    let response = client
-        .create_request("POST", API_URL)
-        .set_header("cookie", raw_cookie)
-        .execute_post_form(&params)?;
-    Ok(response.deserialize_json().unwrap())
+
+    let request = client
+        .post(API_URL)
+        .header("cookie", raw_cookie)
+        .form(&params)
+        .build()?;
+    client.execute(request).and_then(Response::json)
 }
 
 #[derive(Debug, Deserialize)]
@@ -107,16 +105,13 @@ pub struct LiveCheckinResponse {
     pub message: String,
 }
 
-pub fn live_checkin<T: BiliClient>(
-    client: &T,
+pub fn live_checkin(
+    client: &Client,
     raw_cookie: &str,
-) -> std::result::Result<LiveCheckinResponse, <T::Request as BiliApiRequest>::Error> {
+) -> std::result::Result<LiveCheckinResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/xlive/web-ucenter/v1/sign/DoSign";
-    let request = client
-        .create_request("GET", API_URL)
-        .set_header("cookie", raw_cookie);
-    let response = request.execute()?;
-    Ok(response.deserialize_json().unwrap())
+    let request = client.get(API_URL).header("cookie", raw_cookie).build()?;
+    client.execute(request).and_then(Response::json)
 }
 
 #[derive(Debug, Deserialize)]
@@ -151,16 +146,13 @@ pub struct MonthlyLiveCheckinInfoData {
     pub sign_bonus_days_list: Vec<i32>,
 }
 
-pub fn get_monthly_live_checkin_info<T: BiliClient>(
-    client: &T,
+pub fn get_monthly_live_checkin_info(
+    client: &Client,
     raw_cookie: &str,
-) -> std::result::Result<MonthlyLiveCheckinInfoResponse, <T::Request as BiliApiRequest>::Error> {
+) -> std::result::Result<MonthlyLiveCheckinInfoResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/xlive/web-ucenter/v1/sign/WebGetSignInfo";
-    let request = client
-        .create_request("GET", API_URL)
-        .set_header("cookie", raw_cookie);
-    let response = request.execute()?;
-    Ok(response.deserialize_json().unwrap())
+    let request = client.get(API_URL).header("cookie", raw_cookie).build()?;
+    client.execute(request).and_then(Response::json)
 }
 
 #[derive(Debug, Deserialize)]
@@ -188,16 +180,13 @@ pub struct LastMonthLiveCheckInData {
     pub sign_bonus_days_list: Vec<i32>,
 }
 
-pub fn get_last_month_live_checkin_info<T: BiliClient>(
-    client: &T,
+pub fn get_last_month_live_checkin_info(
+    client: &Client,
     raw_cookie: &str,
-) -> std::result::Result<LastMonthLiveCheckInInfoResponse, <T::Request as BiliApiRequest>::Error> {
+) -> std::result::Result<LastMonthLiveCheckInInfoResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/sign/getLastMonthSignDays";
-    let request = client
-        .create_request("GET", API_URL)
-        .set_header("cookie", raw_cookie);
-    let response = request.execute()?;
-    Ok(response.deserialize_json().unwrap())
+    let request = client.get(API_URL).header("cookie", raw_cookie).build()?;
+    client.execute(request).and_then(Response::json)
 }
 
 #[derive(Debug, Deserialize)]
@@ -236,16 +225,15 @@ pub struct UserDanmuProperty {
     pub room_id: i32,
 }
 
-pub fn get_live_info_by_user<T: BiliClient>(
-    client: &T,
+pub fn get_live_info_by_user(
+    client: &Client,
     room_id: i32,
     raw_cookie: &str,
-) -> std::result::Result<GetInfoByUserResponse, <T::Request as BiliApiRequest>::Error> {
+) -> std::result::Result<GetInfoByUserResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser";
     let url = format!("{}?room_id={}", API_URL, room_id);
-    let request = client.create_request("GET", &url);
-    let response = request.set_header("cookie", raw_cookie).execute()?;
-    Ok(response.deserialize_json().unwrap())
+    let request = client.get(&url).header("cookie", raw_cookie).build()?;
+    client.execute(request).and_then(Response::json)
 }
 
 #[cfg(test)]
@@ -254,7 +242,7 @@ mod tests {
 
     #[test]
     fn test_get_medal_for_user() {
-        let agent = ureq::agent();
+        let agent = reqwest::blocking::Client::new();
         let sessdata = std::env::var("SESSDATA").expect("Please set valid SESSDATA for testing");
         let raw_cookie = format!("SESSDATA={}", sessdata);
         // Success scenario
@@ -265,7 +253,7 @@ mod tests {
 
     #[test]
     fn test_get_monthly_live_checkin_info() {
-        let agent = ureq::agent();
+        let agent = reqwest::blocking::Client::new();
         let sessdata = std::env::var("SESSDATA").expect("Please set valid SESSDATA for testing");
         let raw_cookie = format!("SESSDATA={}", sessdata);
         // Success scenario
@@ -282,7 +270,7 @@ mod tests {
 
     #[test]
     fn test_get_last_month_live_checkin_info() {
-        let agent = ureq::agent();
+        let agent = reqwest::blocking::Client::new();
         let sessdata = std::env::var("SESSDATA").expect("Please set valid SESSDATA for testing");
         let raw_cookie = format!("SESSDATA={}", sessdata);
         // Success scenario
@@ -299,7 +287,7 @@ mod tests {
 
     #[test]
     fn test_get_live_info_by_user() {
-        let agent = ureq::agent();
+        let agent = reqwest::blocking::Client::new();
         let sessdata = std::env::var("SESSDATA").expect("Please set valid SESSDATA for testing");
         let raw_cookie = format!("SESSDATA={}", sessdata);
         // Success scenario

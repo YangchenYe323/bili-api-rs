@@ -2,9 +2,8 @@
 
 use std::collections::HashMap;
 
+use reqwest::{blocking::Client, blocking::Response};
 use serde::Deserialize;
-
-use crate::{BiliApiRequest, BiliApiResponse, BiliClient};
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
@@ -96,15 +95,14 @@ pub struct StudioInfo {
     pub master_list: Vec<String>, // Adjust this based on actual expected type
 }
 
-pub fn get_live_room_info<T: BiliClient>(
-    client: &T,
+pub fn get_live_room_info(
+    client: &Client,
     room_id: i32,
-) -> std::result::Result<LiveRoomInfoResponse, <T::Request as BiliApiRequest>::Error> {
+) -> std::result::Result<LiveRoomInfoResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/room/v1/Room/get_info";
     let url = format!("{}?room_id={}", API_URL, room_id);
-    let request = client.create_request("GET", &url);
-    let response = request.execute()?;
-    Ok(response.deserialize_json().unwrap())
+    let request = client.get(&url).build()?;
+    client.execute(request).and_then(Response::json)
 }
 
 #[derive(Debug, Deserialize)]
@@ -141,15 +139,14 @@ pub struct RoomInitData {
     pub special_type: i32,
 }
 
-pub fn get_room_init_info<T: BiliClient>(
-    client: &T,
+pub fn get_room_init_info(
+    client: &Client,
     room_id: i32,
-) -> std::result::Result<RoomInitInfoResponse, <T::Request as BiliApiRequest>::Error> {
+) -> std::result::Result<RoomInitInfoResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/room/v1/Room/room_init";
     let url = format!("{}?id={}", API_URL, room_id);
-    let request = client.create_request("GET", &url);
-    let response = request.execute()?;
-    Ok(response.deserialize_json().unwrap())
+    let reqwest = client.get(&url).build()?;
+    client.execute(reqwest).and_then(Response::json)
 }
 
 #[derive(Debug, Deserialize)]
@@ -215,15 +212,14 @@ pub struct RoomNews {
     pub ctime_text: String,
 }
 
-pub fn get_streamer_info<T: BiliClient>(
-    client: &T,
+pub fn get_streamer_info(
+    client: &Client,
     uid: i32,
-) -> std::result::Result<StreamerInfoResponse, <T::Request as BiliApiRequest>::Error> {
+) -> std::result::Result<StreamerInfoResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/live_user/v1/Master/info";
     let url = format!("{}?uid={}", API_URL, uid);
-    let request = client.create_request("GET", &url);
-    let response = request.execute()?;
-    Ok(response.deserialize_json().unwrap())
+    let request = client.get(&url).build()?;
+    client.execute(request).and_then(Response::json)
 }
 
 #[derive(Debug, Deserialize)]
@@ -266,10 +262,10 @@ pub struct LiveRoomStatus {
     pub broadcast_type: i32,
 }
 
-pub fn query_room_status_batch<T: BiliClient>(
-    client: &T,
+pub fn query_room_status_batch(
+    client: &Client,
     uids: &[i32],
-) -> std::result::Result<RoomStatusBatchResponse, <T::Request as BiliApiRequest>::Error> {
+) -> std::result::Result<RoomStatusBatchResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids";
     let uids_query: String = uids
         .iter()
@@ -277,9 +273,8 @@ pub fn query_room_status_batch<T: BiliClient>(
         .collect::<Vec<_>>()
         .join("&");
     let url = format!("{}?{}", API_URL, uids_query);
-    let request = client.create_request("GET", &url);
-    let response = request.execute()?;
-    Ok(response.deserialize_json().unwrap())
+    let request = client.get(&url).build()?;
+    client.execute(request).and_then(Response::json)
 }
 
 #[derive(Debug, Deserialize)]
@@ -378,14 +373,14 @@ pub struct P2PData {
     pub m_servers: Option<Vec<String>>, // Assuming Vec<String> for simplicity
 }
 
-pub fn get_live_room_play_info<T: BiliClient>(
-    client: &T,
+pub fn get_live_room_play_info(
+    client: &Client,
     room_id: i32,
     protocols: &[&str],
     formats: &[&str],
     codecs: &[&str],
     qn: i32,
-) -> std::result::Result<LiveRoomPlayInfoResponse, <T::Request as BiliApiRequest>::Error> {
+) -> std::result::Result<LiveRoomPlayInfoResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo";
     let protocols_str = protocols.join(",");
     let formats_str = formats.join(",");
@@ -394,11 +389,8 @@ pub fn get_live_room_play_info<T: BiliClient>(
         "{}?room_id={}&protocol={}&format={}&codec={}&qn={}",
         API_URL, room_id, protocols_str, formats_str, codecs_str, qn
     );
-    let request = client.create_request("GET", &url);
-    let response = request.execute()?;
-    // println!("{}", response.deserialize_json::<serde_json::Value>().unwrap());
-    // unimplemented!()
-    Ok(response.deserialize_json().unwrap())
+    let request = client.get(&url).build()?;
+    client.execute(request).and_then(Response::json)
 }
 
 #[cfg(test)]
@@ -406,7 +398,7 @@ mod tests {
     use super::*;
     #[test]
     fn test_get_live_room_info() {
-        let agent = ureq::agent();
+        let agent = reqwest::blocking::Client::new();
         // Success: a valid live room
         assert!(matches!(
             get_live_room_info(&agent, 1029).unwrap(),
@@ -421,7 +413,7 @@ mod tests {
 
     #[test]
     fn test_get_room_init_info() {
-        let agent = ureq::agent();
+        let agent = reqwest::blocking::Client::new();
         // Success: a valid live room
         assert!(matches!(
             get_room_init_info(&agent, 1029).unwrap(),
@@ -436,7 +428,7 @@ mod tests {
 
     #[test]
     fn test_get_streamer_info() {
-        let agent = ureq::agent();
+        let agent = reqwest::blocking::Client::new();
         // Success: a valid uid
         assert!(matches!(
             get_streamer_info(&agent, 697737710).unwrap(),
@@ -451,7 +443,7 @@ mod tests {
 
     #[test]
     fn test_query_room_status_batch() {
-        let agent = ureq::agent();
+        let agent = reqwest::blocking::Client::new();
         let uids = [697737710, 540564177];
         let invalid_uids = [44444444];
         // Success: a valid uid
@@ -468,7 +460,7 @@ mod tests {
 
     #[test]
     fn test_get_live_room_play_info() {
-        let agent = ureq::agent();
+        let agent = reqwest::blocking::Client::new();
         println!(
             "{:?}",
             get_live_room_play_info(
