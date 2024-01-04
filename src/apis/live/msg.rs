@@ -5,7 +5,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use reqwest::blocking::{Client, Response};
 use serde::Deserialize;
 
-use crate::credential::{self, Credential};
+use crate::credential::Credential;
 
 #[derive(Debug)]
 pub struct LiveMessageFormContent {

@@ -67,7 +67,7 @@ pub fn get_medal_for_user(
     const API_URL: &str = "https://api.live.bilibili.com/xlive/app-ucenter/v1/user/GetMyMedals";
     let url = format!("{}?page={}&page_size={}", API_URL, num_page, page_size);
     let request = client
-        .get(&url)
+        .get(url)
         .header("cookie", credential.to_cookie_str())
         .build()?;
     client.execute(request).and_then(Response::json)
@@ -245,7 +245,7 @@ pub fn get_live_info_by_user(
     const API_URL: &str = "https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser";
     let url = format!("{}?room_id={}", API_URL, room_id);
     let request = client
-        .get(&url)
+        .get(url)
         .header("cookie", credential.to_cookie_str())
         .build()?;
     client.execute(request).and_then(Response::json)
