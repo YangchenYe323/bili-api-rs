@@ -4,6 +4,8 @@
 use reqwest::blocking::{Client, Response};
 use serde::Deserialize;
 
+use crate::credential::Credential;
+
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 
@@ -60,11 +62,14 @@ pub fn get_medal_for_user(
     client: &Client,
     page_size: i32,
     num_page: i32,
-    raw_cookie: &str,
+    credential: &Credential,
 ) -> std::result::Result<GetMedalForUserResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/xlive/app-ucenter/v1/user/GetMyMedals";
     let url = format!("{}?page={}&page_size={}", API_URL, num_page, page_size);
-    let request = client.get(&url).header("cookie", raw_cookie).build()?;
+    let request = client
+        .get(&url)
+        .header("cookie", credential.to_cookie_str())
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -79,20 +84,18 @@ pub struct WearMedalResponse {
 pub fn wear_medal(
     client: &Client,
     medal_id: i32,
-    csrf: &str,
-    csrf_token: &str,
-    raw_cookie: &str,
+    credential: &Credential,
 ) -> std::result::Result<WearMedalResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/xlive/web-room/v1/fansMedal/wear";
     let params = [
         ("medal_id", &*medal_id.to_string()),
-        ("csrf", csrf),
-        ("csrf_token", csrf_token),
+        ("csrf", &credential.bili_jct),
+        ("csrf_token", &credential.bili_jct),
     ];
 
     let request = client
         .post(API_URL)
-        .header("cookie", raw_cookie)
+        .header("cookie", credential.to_cookie_str())
         .form(&params)
         .build()?;
     client.execute(request).and_then(Response::json)
@@ -107,10 +110,13 @@ pub struct LiveCheckinResponse {
 
 pub fn live_checkin(
     client: &Client,
-    raw_cookie: &str,
+    credential: &Credential,
 ) -> std::result::Result<LiveCheckinResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/xlive/web-ucenter/v1/sign/DoSign";
-    let request = client.get(API_URL).header("cookie", raw_cookie).build()?;
+    let request = client
+        .get(API_URL)
+        .header("cookie", credential.to_cookie_str())
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -148,10 +154,13 @@ pub struct MonthlyLiveCheckinInfoData {
 
 pub fn get_monthly_live_checkin_info(
     client: &Client,
-    raw_cookie: &str,
+    credential: &Credential,
 ) -> std::result::Result<MonthlyLiveCheckinInfoResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/xlive/web-ucenter/v1/sign/WebGetSignInfo";
-    let request = client.get(API_URL).header("cookie", raw_cookie).build()?;
+    let request = client
+        .get(API_URL)
+        .header("cookie", credential.to_cookie_str())
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -182,10 +191,13 @@ pub struct LastMonthLiveCheckInData {
 
 pub fn get_last_month_live_checkin_info(
     client: &Client,
-    raw_cookie: &str,
+    credential: &Credential,
 ) -> std::result::Result<LastMonthLiveCheckInInfoResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/sign/getLastMonthSignDays";
-    let request = client.get(API_URL).header("cookie", raw_cookie).build()?;
+    let request = client
+        .get(API_URL)
+        .header("cookie", credential.to_cookie_str())
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -228,11 +240,14 @@ pub struct UserDanmuProperty {
 pub fn get_live_info_by_user(
     client: &Client,
     room_id: i32,
-    raw_cookie: &str,
+    credential: &Credential,
 ) -> std::result::Result<GetInfoByUserResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByUser";
     let url = format!("{}?room_id={}", API_URL, room_id);
-    let request = client.get(&url).header("cookie", raw_cookie).build()?;
+    let request = client
+        .get(&url)
+        .header("cookie", credential.to_cookie_str())
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -244,26 +259,30 @@ mod tests {
     fn test_get_medal_for_user() {
         let agent = reqwest::blocking::Client::new();
         let sessdata = std::env::var("SESSDATA").expect("Please set valid SESSDATA for testing");
-        let raw_cookie = format!("SESSDATA={}", sessdata);
+        let bili_jct = std::env::var("BILI_JCT").expect("Please set valid bili_jct for testing");
+        let credential = Credential::new(sessdata, bili_jct);
+        let invalid_credential = Credential::new("123".to_string(), "456".to_string());
         // Success scenario
-        get_medal_for_user(&agent, 10, 1, &raw_cookie).unwrap();
+        get_medal_for_user(&agent, 10, 1, &credential).unwrap();
         // Failure scenario
-        get_medal_for_user(&agent, 10, 1, "123").unwrap();
+        get_medal_for_user(&agent, 10, 1, &invalid_credential).unwrap();
     }
 
     #[test]
     fn test_get_monthly_live_checkin_info() {
         let agent = reqwest::blocking::Client::new();
         let sessdata = std::env::var("SESSDATA").expect("Please set valid SESSDATA for testing");
-        let raw_cookie = format!("SESSDATA={}", sessdata);
+        let bili_jct = std::env::var("BILI_JCT").expect("Please set valid bili_jct for testing");
+        let credential = Credential::new(sessdata, bili_jct);
+        let invalid_credential = Credential::new("123".to_string(), "456".to_string());
         // Success scenario
         assert!(matches!(
-            get_monthly_live_checkin_info(&agent, &raw_cookie).unwrap(),
+            get_monthly_live_checkin_info(&agent, &credential).unwrap(),
             MonthlyLiveCheckinInfoResponse::Success { .. }
         ));
         // Failure scenario
         assert!(matches!(
-            get_monthly_live_checkin_info(&agent, "123").unwrap(),
+            get_monthly_live_checkin_info(&agent, &invalid_credential).unwrap(),
             MonthlyLiveCheckinInfoResponse::Failure { .. }
         ));
     }
@@ -272,15 +291,17 @@ mod tests {
     fn test_get_last_month_live_checkin_info() {
         let agent = reqwest::blocking::Client::new();
         let sessdata = std::env::var("SESSDATA").expect("Please set valid SESSDATA for testing");
-        let raw_cookie = format!("SESSDATA={}", sessdata);
+        let bili_jct = std::env::var("BILI_JCT").expect("Please set valid bili_jct for testing");
+        let credential = Credential::new(sessdata, bili_jct);
+        let invalid_credential = Credential::new("123".to_string(), "456".to_string());
         // Success scenario
         assert!(matches!(
-            get_last_month_live_checkin_info(&agent, &raw_cookie).unwrap(),
+            get_last_month_live_checkin_info(&agent, &credential).unwrap(),
             LastMonthLiveCheckInInfoResponse::Success { .. }
         ));
         // Failure scenario
         assert!(matches!(
-            get_last_month_live_checkin_info(&agent, "123").unwrap(),
+            get_last_month_live_checkin_info(&agent, &invalid_credential).unwrap(),
             LastMonthLiveCheckInInfoResponse::Failure { .. }
         ));
     }
@@ -289,19 +310,21 @@ mod tests {
     fn test_get_live_info_by_user() {
         let agent = reqwest::blocking::Client::new();
         let sessdata = std::env::var("SESSDATA").expect("Please set valid SESSDATA for testing");
-        let raw_cookie = format!("SESSDATA={}", sessdata);
+        let bili_jct = std::env::var("BILI_JCT").expect("Please set valid bili_jct for testing");
+        let credential = Credential::new(sessdata, bili_jct);
+        let invalid_credential = Credential::new("123".to_string(), "456".to_string());
         // Success scenario
         assert!(matches!(
-            get_live_info_by_user(&agent, 1029, &raw_cookie).unwrap(),
+            get_live_info_by_user(&agent, 1029, &credential).unwrap(),
             GetInfoByUserResponse::Success { .. }
         ));
         // Failure scenario
         assert!(matches!(
-            get_live_info_by_user(&agent, 1029, "123").unwrap(),
+            get_live_info_by_user(&agent, 1029, &invalid_credential).unwrap(),
             GetInfoByUserResponse::Failure { .. }
         ));
         assert!(matches!(
-            get_live_info_by_user(&agent, 44444444, &raw_cookie).unwrap(),
+            get_live_info_by_user(&agent, 44444444, &credential).unwrap(),
             GetInfoByUserResponse::Failure { .. }
         ));
     }

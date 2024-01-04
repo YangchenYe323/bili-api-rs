@@ -5,6 +5,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use reqwest::blocking::{Client, Response};
 use serde::Deserialize;
 
+use crate::credential::{self, Credential};
+
 #[derive(Debug)]
 pub struct LiveMessageFormContent {
     /// 弹幕内容
@@ -42,14 +44,13 @@ pub struct SendLiveMessageModeInfo {
 #[allow(clippy::too_many_arguments)]
 pub fn send_live_message(
     client: &Client,
-    room_id: i32,     // 直播间id
-    msg: &str,        // 弹幕内容
-    color: i32,       // 弹幕颜色
-    fontsize: i32,    // 字体大小
-    mode: i32,        // 弹幕模式 (1 - 飘屏, 4 - 底部, 5 - 顶部)
-    bubble: i32,      // 气泡 (1)
-    csrf: &str,       // cookie bili_jct字段
-    raw_cookie: &str, // SESSDATA
+    room_id: i32,  // 直播间id
+    msg: &str,     // 弹幕内容
+    color: i32,    // 弹幕颜色
+    fontsize: i32, // 字体大小
+    mode: i32,     // 弹幕模式 (1 - 飘屏, 4 - 底部, 5 - 顶部)
+    bubble: i32,   // 气泡 (1)
+    credential: &Credential,
 ) -> std::result::Result<SendLiveMessageResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/msg/send";
     let rnd = SystemTime::now()
@@ -65,9 +66,13 @@ pub fn send_live_message(
         ("rnd", &*rnd),
         ("roomid", &*room_id.to_string()),
         ("bubble", &*bubble.to_string()),
-        ("csrf", csrf),
-        ("csrf_token", csrf),
+        ("csrf", &credential.bili_jct),
+        ("csrf_token", &credential.bili_jct),
     ];
-    let request = client.post(API_URL).header("cookie", raw_cookie).form(&form).build()?;
+    let request = client
+        .post(API_URL)
+        .header("cookie", credential.to_cookie_str())
+        .form(&form)
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
