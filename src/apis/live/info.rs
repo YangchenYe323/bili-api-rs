@@ -64,7 +64,7 @@ pub struct LiveRoomData {
 pub struct NewPendants {
     pub frame: Frame,
     pub mobile_frame: Option<Frame>,
-    pub badge: Badge,
+    pub badge: Option<Badge>,
     pub mobile_badge: Option<Badge>,
 }
 
@@ -399,6 +399,10 @@ mod tests {
     #[test]
     fn test_get_live_room_info() {
         let agent = reqwest::blocking::Client::new();
+        assert!(matches!(
+            get_live_room_info(&agent, 21887355).unwrap(),
+            LiveRoomInfoResponse::Success { .. }
+        ));
         // Success: a valid live room
         assert!(matches!(
             get_live_room_info(&agent, 1029).unwrap(),
