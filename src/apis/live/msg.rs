@@ -22,11 +22,17 @@ pub struct LiveMessageFormContent {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct SendLiveMessageResponse {
-    pub code: i32,
-    pub message: String,
-    pub msg: String,
-    pub data: SendLiveMessageData,
+#[serde(untagged)]
+pub enum SendLiveMessageResponse {
+    Success {
+        code: i32,
+        message: String,
+        data: SendLiveMessageData,
+    },
+    Failure {
+        code: i32,
+        message: String,
+    },
 }
 
 #[derive(Debug, Deserialize)]
