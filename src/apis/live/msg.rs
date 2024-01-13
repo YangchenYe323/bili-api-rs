@@ -79,6 +79,8 @@ pub fn send_live_message(
         .post(API_URL)
         .header("cookie", credential.to_cookie_str())
         .form(&form)
-        .header("User-Agent", crate::apis::USER_AGENT).build()?;
+        .header("User-Agent", crate::apis::USER_AGENT)
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
