@@ -69,7 +69,7 @@ pub fn get_medal_for_user(
     let request = client
         .get(url)
         .header("cookie", credential.to_cookie_str())
-        .build()?;
+        .header("User-Agent", crate::apis::USER_AGENT).build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -97,7 +97,7 @@ pub fn wear_medal(
         .post(API_URL)
         .header("cookie", credential.to_cookie_str())
         .form(&params)
-        .build()?;
+        .header("User-Agent", crate::apis::USER_AGENT).build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -116,7 +116,7 @@ pub fn live_checkin(
     let request = client
         .get(API_URL)
         .header("cookie", credential.to_cookie_str())
-        .build()?;
+        .header("User-Agent", crate::apis::USER_AGENT).build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -160,7 +160,7 @@ pub fn get_monthly_live_checkin_info(
     let request = client
         .get(API_URL)
         .header("cookie", credential.to_cookie_str())
-        .build()?;
+        .header("User-Agent", crate::apis::USER_AGENT).build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -197,7 +197,7 @@ pub fn get_last_month_live_checkin_info(
     let request = client
         .get(API_URL)
         .header("cookie", credential.to_cookie_str())
-        .build()?;
+        .header("User-Agent", crate::apis::USER_AGENT).build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -247,7 +247,7 @@ pub fn get_live_info_by_user(
     let request = client
         .get(url)
         .header("cookie", credential.to_cookie_str())
-        .build()?;
+        .header("User-Agent", crate::apis::USER_AGENT).build()?;
     client.execute(request).and_then(Response::json)
 }
 

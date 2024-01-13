@@ -101,7 +101,7 @@ pub fn get_live_room_info(
 ) -> std::result::Result<LiveRoomInfoResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/room/v1/Room/get_info";
     let url = format!("{}?room_id={}", API_URL, room_id);
-    let request = client.get(url).build()?;
+    let request = client.get(url).header("User-Agent", crate::apis::USER_AGENT).build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -145,7 +145,7 @@ pub fn get_room_init_info(
 ) -> std::result::Result<RoomInitInfoResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/room/v1/Room/room_init";
     let url = format!("{}?id={}", API_URL, room_id);
-    let reqwest = client.get(url).build()?;
+    let reqwest = client.get(url).header("User-Agent", crate::apis::USER_AGENT).build()?;
     client.execute(reqwest).and_then(Response::json)
 }
 
@@ -218,7 +218,7 @@ pub fn get_streamer_info(
 ) -> std::result::Result<StreamerInfoResponse, reqwest::Error> {
     const API_URL: &str = "https://api.live.bilibili.com/live_user/v1/Master/info";
     let url = format!("{}?uid={}", API_URL, uid);
-    let request = client.get(url).build()?;
+    let request = client.get(url).header("User-Agent", crate::apis::USER_AGENT).build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -273,7 +273,7 @@ pub fn query_room_status_batch(
         .collect::<Vec<_>>()
         .join("&");
     let url = format!("{}?{}", API_URL, uids_query);
-    let request = client.get(url).build()?;
+    let request = client.get(url).header("User-Agent", crate::apis::USER_AGENT).build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -389,7 +389,7 @@ pub fn get_live_room_play_info(
         "{}?room_id={}&protocol={}&format={}&codec={}&qn={}",
         API_URL, room_id, protocols_str, formats_str, codecs_str, qn
     );
-    let request = client.get(url).build()?;
+    let request = client.get(url).header("User-Agent", crate::apis::USER_AGENT).build()?;
     client.execute(request).and_then(Response::json)
 }
 
