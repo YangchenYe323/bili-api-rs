@@ -29,7 +29,7 @@ pub struct GetMedalForUserData {
     pub page_info: PageInfo,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct MedalItem {
     pub can_deleted: bool,
     pub day_limit: i32,
