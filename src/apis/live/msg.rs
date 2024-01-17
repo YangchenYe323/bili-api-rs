@@ -3,7 +3,7 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use reqwest::blocking::{Client, Response};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::credential::Credential;
 
@@ -21,7 +21,7 @@ pub struct LiveMessageFormContent {
     pub bubble: i32,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum SendLiveMessageResponse {
     Success {
@@ -35,12 +35,12 @@ pub enum SendLiveMessageResponse {
     },
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SendLiveMessageData {
     pub mode_info: SendLiveMessageModeInfo,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SendLiveMessageModeInfo {
     pub mode: i32,
     pub show_player_type: i32,

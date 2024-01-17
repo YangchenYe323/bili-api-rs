@@ -2,11 +2,11 @@
 //! for API documentation.
 
 use reqwest::blocking::{Client, Response};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::credential::Credential;
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 
 pub enum GetMedalForUserResponse {
@@ -22,14 +22,14 @@ pub enum GetMedalForUserResponse {
     },
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GetMedalForUserData {
     pub count: i32,
     pub items: Vec<MedalItem>,
     pub page_info: PageInfo,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MedalItem {
     pub can_deleted: bool,
     pub day_limit: i32,
@@ -52,7 +52,7 @@ pub struct MedalItem {
     pub uname: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PageInfo {
     pub total_page: i32,
     pub cur_page: i32,
@@ -73,7 +73,7 @@ pub fn get_medal_for_user(
     client.execute(request).and_then(Response::json)
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct WearMedalResponse {
     pub code: i32,
     pub ttl: i32,
@@ -101,7 +101,7 @@ pub fn wear_medal(
     client.execute(request).and_then(Response::json)
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LiveCheckinResponse {
     pub code: i32,
     pub ttl: i32,
@@ -120,7 +120,7 @@ pub fn live_checkin(
     client.execute(request).and_then(Response::json)
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum MonthlyLiveCheckinInfoResponse {
     Success {
@@ -135,7 +135,7 @@ pub enum MonthlyLiveCheckinInfoResponse {
     },
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct MonthlyLiveCheckinInfoData {
     pub text: String,
@@ -164,7 +164,7 @@ pub fn get_monthly_live_checkin_info(
     client.execute(request).and_then(Response::json)
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum LastMonthLiveCheckInInfoResponse {
     Success {
@@ -179,7 +179,7 @@ pub enum LastMonthLiveCheckInInfoResponse {
     },
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct LastMonthLiveCheckInData {
     pub days: i32,
@@ -201,7 +201,7 @@ pub fn get_last_month_live_checkin_info(
     client.execute(request).and_then(Response::json)
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum GetInfoByUserResponse {
     Success {
@@ -216,12 +216,12 @@ pub enum GetInfoByUserResponse {
     },
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GetInfoByUserData {
     pub property: UserLiveRoomProperty,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserLiveRoomProperty {
     pub bubble: i32,
     pub bubble_color: String,
@@ -229,7 +229,7 @@ pub struct UserLiveRoomProperty {
     pub uname_color: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserDanmuProperty {
     pub color: i32,
     pub length: i32,
