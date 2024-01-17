@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use reqwest::{blocking::Client, blocking::Response};
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum LiveRoomInfoResponse {
     Success {
@@ -19,7 +19,7 @@ pub enum LiveRoomInfoResponse {
     },
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct LiveRoomData {
     pub uid: i32,
     pub room_id: i32,
@@ -60,7 +60,7 @@ pub struct LiveRoomData {
     pub studio_info: StudioInfo,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct NewPendants {
     pub frame: Frame,
     pub mobile_frame: Option<Frame>,
@@ -68,7 +68,7 @@ pub struct NewPendants {
     pub mobile_badge: Option<Badge>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Frame {
     pub name: String,
     pub value: String,
@@ -81,7 +81,7 @@ pub struct Frame {
     pub use_old_area: bool,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Badge {
     pub name: String,
     pub position: i32,
@@ -89,7 +89,7 @@ pub struct Badge {
     pub desc: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct StudioInfo {
     pub status: i32,
     pub master_list: Vec<String>, // Adjust this based on actual expected type
@@ -105,7 +105,7 @@ pub fn get_live_room_info(
     client.execute(request).and_then(Response::json)
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum RoomInitInfoResponse {
     Success {
@@ -119,7 +119,7 @@ pub enum RoomInitInfoResponse {
     },
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct RoomInitData {
     pub room_id: i32,
     pub short_id: i32,
@@ -149,7 +149,7 @@ pub fn get_room_init_info(
     client.execute(reqwest).and_then(Response::json)
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum StreamerInfoResponse {
     Success {
@@ -163,7 +163,7 @@ pub enum StreamerInfoResponse {
     },
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct StreamerData {
     pub info: StreamerInfo,
     pub exp: StreamerExp,
@@ -176,7 +176,7 @@ pub struct StreamerData {
     pub room_news: RoomNews,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct StreamerInfo {
     pub uid: i32,
     pub uname: String,
@@ -185,19 +185,19 @@ pub struct StreamerInfo {
     pub gender: i32,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct OfficialVerify {
     #[serde(rename = "type")]
     pub type_: i32,
     pub desc: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct StreamerExp {
     pub master_level: MasterLevel,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct MasterLevel {
     pub level: i32,
     pub color: i32,
@@ -205,7 +205,7 @@ pub struct MasterLevel {
     pub next: Vec<i32>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct RoomNews {
     pub content: String,
     pub ctime: String,
@@ -222,7 +222,7 @@ pub fn get_streamer_info(
     client.execute(request).and_then(Response::json)
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum RoomStatusBatchResponse {
     Success {
@@ -236,7 +236,7 @@ pub enum RoomStatusBatchResponse {
     },
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct LiveRoomStatus {
     pub title: String,
     pub room_id: i32,
@@ -277,7 +277,7 @@ pub fn query_room_status_batch(
     client.execute(request).and_then(Response::json)
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum LiveRoomPlayInfoResponse {
     Success {
@@ -292,7 +292,7 @@ pub enum LiveRoomPlayInfoResponse {
     },
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct LiveRoomPlayData {
     pub room_id: i32,
     pub short_id: i32,
@@ -311,13 +311,13 @@ pub struct LiveRoomPlayData {
     pub playurl_info: Option<PlayurlInfo>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct PlayurlInfo {
     pub conf_json: String,
     pub playurl: Option<Playurl>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Playurl {
     pub cid: i32,
     pub g_qn_desc: Vec<QualityDescription>,
@@ -325,7 +325,7 @@ pub struct Playurl {
     pub p2p_data: P2PData,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct QualityDescription {
     pub qn: i32,
     pub desc: String,
@@ -333,20 +333,20 @@ pub struct QualityDescription {
     pub attr_desc: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct StreamInfo {
     pub protocol_name: String,
     pub format: Vec<FormatInfo>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct FormatInfo {
     pub format_name: String,
     pub master_url: String,
     pub codec: Vec<CodecInfo>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct CodecInfo {
     pub codec_name: String,
     pub current_qn: i32,
@@ -358,14 +358,14 @@ pub struct CodecInfo {
     pub attr_name: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct UrlInfo {
     pub host: String,
     pub extra: String,
     pub stream_ttl: i32,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct P2PData {
     pub p2p: bool,
     pub p2p_type: i32,

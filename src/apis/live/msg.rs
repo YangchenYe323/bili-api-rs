@@ -7,7 +7,7 @@ use serde::Deserialize;
 
 use crate::credential::Credential;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LiveMessageFormContent {
     /// 弹幕内容
     pub msg: String,
@@ -21,7 +21,7 @@ pub struct LiveMessageFormContent {
     pub bubble: i32,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum SendLiveMessageResponse {
     Success {
@@ -35,12 +35,12 @@ pub enum SendLiveMessageResponse {
     },
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct SendLiveMessageData {
     pub mode_info: SendLiveMessageModeInfo,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct SendLiveMessageModeInfo {
     pub mode: i32,
     pub show_player_type: i32,
