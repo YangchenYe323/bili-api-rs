@@ -269,9 +269,15 @@ mod tests {
         let credential = get_credential_for_test_or_abort();
         let invalid_credential = Credential::new("123".to_string(), "456".to_string());
         // Success scenario
-        get_medal_for_user(&agent, 10, 1, &credential).unwrap();
+        assert!(matches!(
+            get_medal_for_user(&agent, 10, 1, &credential).unwrap(),
+            GetMedalForUserResponse::Success { .. }
+        ));
         // Failure scenario
-        get_medal_for_user(&agent, 10, 1, &invalid_credential).unwrap();
+        assert!(matches!(
+            get_medal_for_user(&agent, 10, 1, &invalid_credential).unwrap(),
+            GetMedalForUserResponse::Failure { .. }
+        ));
     }
 
     #[test]
