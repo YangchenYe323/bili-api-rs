@@ -69,7 +69,8 @@ pub fn get_medal_for_user(
     let request = client
         .get(url)
         .header("cookie", credential.to_cookie_str())
-        .header("User-Agent", crate::apis::USER_AGENT).build()?;
+        .header("User-Agent", crate::apis::USER_AGENT)
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -97,7 +98,8 @@ pub fn wear_medal(
         .post(API_URL)
         .header("cookie", credential.to_cookie_str())
         .form(&params)
-        .header("User-Agent", crate::apis::USER_AGENT).build()?;
+        .header("User-Agent", crate::apis::USER_AGENT)
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -116,7 +118,8 @@ pub fn live_checkin(
     let request = client
         .get(API_URL)
         .header("cookie", credential.to_cookie_str())
-        .header("User-Agent", crate::apis::USER_AGENT).build()?;
+        .header("User-Agent", crate::apis::USER_AGENT)
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -160,7 +163,8 @@ pub fn get_monthly_live_checkin_info(
     let request = client
         .get(API_URL)
         .header("cookie", credential.to_cookie_str())
-        .header("User-Agent", crate::apis::USER_AGENT).build()?;
+        .header("User-Agent", crate::apis::USER_AGENT)
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -197,7 +201,8 @@ pub fn get_last_month_live_checkin_info(
     let request = client
         .get(API_URL)
         .header("cookie", credential.to_cookie_str())
-        .header("User-Agent", crate::apis::USER_AGENT).build()?;
+        .header("User-Agent", crate::apis::USER_AGENT)
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
 
@@ -247,20 +252,21 @@ pub fn get_live_info_by_user(
     let request = client
         .get(url)
         .header("cookie", credential.to_cookie_str())
-        .header("User-Agent", crate::apis::USER_AGENT).build()?;
+        .header("User-Agent", crate::apis::USER_AGENT)
+        .build()?;
     client.execute(request).and_then(Response::json)
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::credential::extract_credential::get_credential_for_test_or_abort;
+
     use super::*;
 
     #[test]
     fn test_get_medal_for_user() {
         let agent = reqwest::blocking::Client::new();
-        let sessdata = std::env::var("SESSDATA").expect("Please set valid SESSDATA for testing");
-        let bili_jct = std::env::var("BILI_JCT").expect("Please set valid bili_jct for testing");
-        let credential = Credential::new(sessdata, bili_jct);
+        let credential = get_credential_for_test_or_abort();
         let invalid_credential = Credential::new("123".to_string(), "456".to_string());
         // Success scenario
         get_medal_for_user(&agent, 10, 1, &credential).unwrap();
@@ -271,9 +277,7 @@ mod tests {
     #[test]
     fn test_get_monthly_live_checkin_info() {
         let agent = reqwest::blocking::Client::new();
-        let sessdata = std::env::var("SESSDATA").expect("Please set valid SESSDATA for testing");
-        let bili_jct = std::env::var("BILI_JCT").expect("Please set valid bili_jct for testing");
-        let credential = Credential::new(sessdata, bili_jct);
+        let credential = get_credential_for_test_or_abort();
         let invalid_credential = Credential::new("123".to_string(), "456".to_string());
         // Success scenario
         assert!(matches!(
@@ -290,9 +294,7 @@ mod tests {
     #[test]
     fn test_get_last_month_live_checkin_info() {
         let agent = reqwest::blocking::Client::new();
-        let sessdata = std::env::var("SESSDATA").expect("Please set valid SESSDATA for testing");
-        let bili_jct = std::env::var("BILI_JCT").expect("Please set valid bili_jct for testing");
-        let credential = Credential::new(sessdata, bili_jct);
+        let credential = get_credential_for_test_or_abort();
         let invalid_credential = Credential::new("123".to_string(), "456".to_string());
         // Success scenario
         assert!(matches!(
@@ -309,9 +311,7 @@ mod tests {
     #[test]
     fn test_get_live_info_by_user() {
         let agent = reqwest::blocking::Client::new();
-        let sessdata = std::env::var("SESSDATA").expect("Please set valid SESSDATA for testing");
-        let bili_jct = std::env::var("BILI_JCT").expect("Please set valid bili_jct for testing");
-        let credential = Credential::new(sessdata, bili_jct);
+        let credential = get_credential_for_test_or_abort();
         let invalid_credential = Credential::new("123".to_string(), "456".to_string());
         // Success scenario
         assert!(matches!(
