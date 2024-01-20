@@ -14,7 +14,7 @@ pub const ROOM_INIT_NOT_EXIST: i32 = 60004;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LiveRoomInfoResponse {
-  data: LiveRoomData,
+  pub data: LiveRoomData,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -105,7 +105,7 @@ pub fn get_live_room_info(client: &Client, room_id: i32) -> crate::Result<LiveRo
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RoomInitInfoResponse {
-  data: RoomInitData,
+  pub data: RoomInitData,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -140,7 +140,7 @@ pub fn get_room_init_info(client: &Client, room_id: i32) -> crate::Result<RoomIn
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct StreamerInfoResponse {
-  data: StreamerData,
+  pub data: StreamerData,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -204,7 +204,7 @@ pub fn get_streamer_info(client: &Client, uid: i32) -> crate::Result<StreamerInf
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RoomStatusBatchResponse {
-  data: HashMap<String, LiveRoomStatus>,
+  pub data: HashMap<String, LiveRoomStatus>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -253,7 +253,7 @@ pub fn query_room_status_batch(
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LiveRoomPlayInfoResponse {
-  data: LiveRoomPlayData,
+  pub data: LiveRoomPlayData,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

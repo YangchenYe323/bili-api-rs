@@ -9,7 +9,7 @@ use crate::{credential::Credential, utils::handle_api_response};
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 
 pub struct GetMedalForUserResponse {
-  data: GetMedalForUserData,
+  pub data: GetMedalForUserData,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -109,7 +109,7 @@ pub fn live_checkin(
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct MonthlyLiveCheckinInfoResponse {
-  data: MonthlyLiveCheckinInfoData,
+  pub data: MonthlyLiveCheckinInfoData,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -144,7 +144,7 @@ pub fn get_monthly_live_checkin_info(
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct LastMonthLiveCheckInInfoResponse {
-  data: LastMonthLiveCheckInData,
+  pub data: LastMonthLiveCheckInData,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -172,7 +172,7 @@ pub fn get_last_month_live_checkin_info(
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct GetInfoByUserResponse {
-  data: GetInfoByUserData,
+  pub data: GetInfoByUserData,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -214,7 +214,9 @@ pub fn get_live_info_by_user(
 #[cfg(test)]
 mod tests {
   use crate::{
-    credential::extract_credential::get_credential_for_test_or_abort, utils::assert_error_code, error::{REQUEST_ERROR, ROOM_NOT_EXIST},
+    credential::extract_credential::get_credential_for_test_or_abort,
+    error::{REQUEST_ERROR, ROOM_NOT_EXIST},
+    utils::assert_error_code,
   };
 
   use super::*;

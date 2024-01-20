@@ -121,7 +121,7 @@ impl LiveMessageConfig {
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct SendLiveMessageResponse {
-  data: SendLiveMessageData,
+  pub data: SendLiveMessageData,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
