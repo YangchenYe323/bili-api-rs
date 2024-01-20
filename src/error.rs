@@ -15,7 +15,9 @@ pub enum Error {
   /// is OK but the response specific code implies an error.
   #[error("{}", 0)]
   Api(ApiError),
-  /// We encode Bilibili's API response in static Rust type,
+  /// We encode Bilibili's API response in static Rust type, and this error is returned
+  /// if the API responded with success code but we cannot deserialize its body into the
+  /// Rust type we have.
   #[error("{}", 0)]
   Deserialize(serde_json::Error),
 }
