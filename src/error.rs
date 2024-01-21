@@ -9,16 +9,16 @@ pub const ROOM_NOT_EXIST: i32 = 19002001;
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
   /// Reqwest error, this includes I/O error or HTTP status error.
-  #[error("{}", 0)]
+  #[error("{0}")]
   Reqwest(reqwest::Error),
   /// Bilibili's API response error. This happens where the HTTP status code
   /// is OK but the response specific code implies an error.
-  #[error("{}", 0)]
+  #[error("{0}")]
   Api(ApiError),
   /// We encode Bilibili's API response in static Rust type, and this error is returned
   /// if the API responded with success code but we cannot deserialize its body into the
   /// Rust type we have.
-  #[error("{}", 0)]
+  #[error("{0}")]
   Deserialize(serde_json::Error),
 }
 
