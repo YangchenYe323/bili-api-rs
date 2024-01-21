@@ -6,7 +6,7 @@ use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{credential::Credential, utils::handle_api_response};
+use crate::{credential::Credential, error::ApiError, utils::handle_api_response};
 
 pub const DEFAULT_FONTSIZE: i32 = 25;
 pub const WHITE: i32 = 0xffffff;
@@ -56,6 +56,23 @@ pub struct LiveMessageConfig {
   pub(crate) csrf: String,
   /// CSRF token: bili_jct
   pub(crate) csrf_token: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct SendLiveMessageResponse {
+  pub data: SendLiveMessageData,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct SendLiveMessageData {
+  pub mode_info: SendLiveMessageModeInfo,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct SendLiveMessageModeInfo {
+  pub mode: i32,
+  pub show_player_type: i32,
+  pub extra: String,
 }
 
 impl Default for LiveMessageConfig {
@@ -119,23 +136,6 @@ impl LiveMessageConfig {
   }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Default)]
-pub struct SendLiveMessageResponse {
-  pub data: SendLiveMessageData,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone, Default)]
-pub struct SendLiveMessageData {
-  pub mode_info: SendLiveMessageModeInfo,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone, Default)]
-pub struct SendLiveMessageModeInfo {
-  pub mode: i32,
-  pub show_player_type: i32,
-  pub extra: String,
-}
-
 pub fn send_live_message(
   client: &Client,
   mut config: LiveMessageConfig,
@@ -162,13 +162,27 @@ pub fn send_live_message(
   handle_api_response(client.execute(request)?)
 }
 
+/// 获取当前API错误对应的禁言粉丝牌等级, 若当前错误不是粉丝牌等级禁言则返回None
+pub fn get_guard_level_threshold(err: &ApiError) -> Option<i32> {
+  use regex::Regex;
+  if err.code() != -403 {
+    return None;
+  }
+
+  let re = Regex::new(r"^主播对粉丝勋章([0-9]+)以下开启了禁言，等待主播解除~$").unwrap();
+  let mat = re.captures(err.message())?;
+  let level = i32::from_str_radix(mat.get(1).unwrap().as_str(), 10).expect("Cannot parse as i32");
+  Some(level)
+}
+
 #[cfg(test)]
 mod tests {
   use std::time::Duration;
 
   use crate::{
+    apis::live::msg::get_guard_level_threshold,
     credential::extract_credential::{get_credential_for_test_or_abort, get_fake_credential},
-    error::REQUEST_ERROR,
+    error::{ApiError, REQUEST_ERROR},
     utils::assert_error_code,
   };
 
@@ -200,5 +214,14 @@ mod tests {
     config.fontsize(0);
     let result = send_live_message(&agent, config, &credential);
     assert_error_code(result, REQUEST_ERROR);
+  }
+
+  #[test]
+  pub fn test_parse_err() {
+    let api_err = ApiError::new(
+      -403,
+      "主播对粉丝勋章33以下开启了禁言，等待主播解除~".to_string(),
+    );
+    assert_eq!(Some(33), get_guard_level_threshold(&api_err));
   }
 }
