@@ -18,6 +18,8 @@ impl Credential {
 
 #[cfg(test)]
 pub mod extract_credential {
+  use std::path::PathBuf;
+
   use super::Credential;
 
   /// This utility function is used for getting a valid user credential in test environment.
@@ -30,7 +32,20 @@ pub mod extract_credential {
     } else if let Some(cred) = get_credential_from_file() {
       cred
     } else {
-      panic!("Failed to get user credential")
+      panic!(
+        r#"
+  无法获取用户哔哩哔哩登录信息。
+  请1. 定义环境变量SESSDATA和BILI_JCT:
+    `SESSDATA=XXXX BILI_JCT=XXXX cargo test`
+  或2. 在项目根目录下放置包含sessdata和bili_jct字段的cookies.json。
+  示例文件内容:
+    {{
+      "sessdata": "XXXX",
+      "bili_jct": "XXXX"
+    }}
+  如何获取自己的登录信息参见`https://github.com/biliup/biliup-rs`
+  "#
+      );
     }
   }
 
@@ -48,11 +63,14 @@ pub mod extract_credential {
   }
 
   fn get_credential_from_file() -> Option<Credential> {
+    let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    path.push("cookies.json");
+
     let cookie = std::fs::OpenOptions::new()
       .read(true)
       .write(false)
       .create(false)
-      .open("./cookies.json")
+      .open(&path)
       .ok()?;
     let cookie = serde_json::from_reader(cookie).ok()?;
     Some(cookie)
