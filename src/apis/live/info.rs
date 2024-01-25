@@ -12,6 +12,9 @@ pub const GENERAL_ERROR: i32 = 1;
 /// 房间初始化API房间不存在
 pub const ROOM_INIT_NOT_EXIST: i32 = 60004;
 
+/// UID存储类型
+pub type Uid = i64;
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LiveRoomInfoResponse {
   pub data: LiveRoomData,
@@ -19,7 +22,7 @@ pub struct LiveRoomInfoResponse {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LiveRoomData {
-  pub uid: i32,
+  pub uid: Uid,
   pub room_id: i32,
   pub short_id: i32,
   pub attention: i32,
@@ -112,7 +115,7 @@ pub struct RoomInitInfoResponse {
 pub struct RoomInitData {
   pub room_id: i32,
   pub short_id: i32,
-  pub uid: i32,
+  pub uid: Uid,
   pub need_p2p: i32,
   pub is_hidden: bool,
   pub is_locked: bool,
@@ -158,7 +161,7 @@ pub struct StreamerData {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct StreamerInfo {
-  pub uid: i32,
+  pub uid: Uid,
   pub uname: String,
   pub face: String,
   pub official_verify: OfficialVerify,
@@ -192,7 +195,7 @@ pub struct RoomNews {
   pub ctime_text: String,
 }
 
-pub fn get_streamer_info(client: &Client, uid: i32) -> crate::Result<StreamerInfoResponse> {
+pub fn get_streamer_info(client: &Client, uid: Uid) -> crate::Result<StreamerInfoResponse> {
   const API_URL: &str = "https://api.live.bilibili.com/live_user/v1/Master/info";
   let url = format!("{}?uid={}", API_URL, uid);
   let request = client
@@ -211,7 +214,7 @@ pub struct RoomStatusBatchResponse {
 pub struct LiveRoomStatus {
   pub title: String,
   pub room_id: i32,
-  pub uid: i32,
+  pub uid: Uid,
   pub online: i32,
   pub live_time: i64,
   pub live_status: i32,
@@ -235,7 +238,7 @@ pub struct LiveRoomStatus {
 
 pub fn query_room_status_batch(
   client: &Client,
-  uids: &[i32],
+  uids: &[Uid],
 ) -> crate::Result<RoomStatusBatchResponse> {
   const API_URL: &str = "https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids";
   let uids_query: String = uids
@@ -260,7 +263,7 @@ pub struct LiveRoomPlayInfoResponse {
 pub struct LiveRoomPlayData {
   pub room_id: i32,
   pub short_id: i32,
-  pub uid: i32,
+  pub uid: Uid,
   pub is_hidden: bool,
   pub is_locked: bool,
   pub is_portrait: bool,
@@ -392,8 +395,8 @@ mod tests {
 
   #[test]
   fn test_get_streamer_info() {
-    const VALID_UID: i32 = 697737710;
-    const INVALID_UID: i32 = 0;
+    const VALID_UID: Uid = 697737710;
+    const INVALID_UID: Uid = 0;
 
     let agent = reqwest::blocking::Client::new();
     // Success: a valid uid
@@ -405,9 +408,9 @@ mod tests {
 
   #[test]
   fn test_query_room_status_batch() {
-    const UID1: i32 = 697737710;
-    const UID2: i32 = 540564177;
-    const INVALID_UID: i32 = 44444444;
+    const UID1: Uid = 697737710;
+    const UID2: Uid = 540564177;
+    const INVALID_UID: Uid = 44444444;
 
     let agent = reqwest::blocking::Client::new();
     let uids = [UID1, UID2];
