@@ -2,10 +2,10 @@
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+use crate::client::Client;
 use crate::{credential::Credential, error::ApiError, utils::handle_api_response};
 
 pub const DEFAULT_FONTSIZE: i32 = 25;
@@ -159,6 +159,9 @@ pub fn send_live_message(
     .header("User-Agent", crate::apis::USER_AGENT)
     .build()?;
 
+  // B站直播弹幕API限制过快发送弹幕, 在此处做限流
+  client.block_till_ready();
+
   handle_api_response(client.execute(request)?)
 }
 
@@ -179,18 +182,18 @@ pub fn get_guard_level_threshold(err: &ApiError) -> Option<i32> {
 mod tests {
   use std::time::Duration;
 
+  use super::{send_live_message, LiveMessageConfig};
   use crate::{
     apis::live::msg::get_guard_level_threshold,
+    client::Client,
     credential::extract_credential::{get_credential_for_test_or_abort, get_fake_credential},
     error::{ApiError, REQUEST_ERROR},
     utils::assert_error_code,
   };
 
-  use super::{send_live_message, LiveMessageConfig};
-
   #[test]
   pub fn test_send_msg() {
-    let agent = reqwest::blocking::Client::new();
+    let agent = Client::new();
     let credential = get_credential_for_test_or_abort();
     let config = LiveMessageConfig::with_roomid_and_msg(1029, "加油".to_string());
 

@@ -1,9 +1,9 @@
 //! Please refer to `https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/live/user.md`
 //! for API documentation.
 
-use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 
+use crate::client::Client;
 use crate::{credential::Credential, utils::handle_api_response};
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -213,17 +213,16 @@ pub fn get_live_info_by_user(
 
 #[cfg(test)]
 mod tests {
+  use super::*;
   use crate::{
     credential::extract_credential::get_credential_for_test_or_abort,
     error::{REQUEST_ERROR, ROOM_NOT_EXIST},
     utils::assert_error_code,
   };
 
-  use super::*;
-
   #[test]
   fn test_get_medal_for_user() {
-    let agent = reqwest::blocking::Client::new();
+    let agent = Client::new();
     let credential = get_credential_for_test_or_abort();
     let invalid_credential = Credential::new("123".to_string(), "456".to_string());
     // Success scenario
@@ -237,7 +236,7 @@ mod tests {
 
   #[test]
   fn test_get_monthly_live_checkin_info() {
-    let agent = reqwest::blocking::Client::new();
+    let agent = Client::new();
     let credential = get_credential_for_test_or_abort();
     let invalid_credential = Credential::new("123".to_string(), "456".to_string());
     // Success scenario
@@ -251,7 +250,7 @@ mod tests {
 
   #[test]
   fn test_get_last_month_live_checkin_info() {
-    let agent = reqwest::blocking::Client::new();
+    let agent = Client::new();
     let credential = get_credential_for_test_or_abort();
     let invalid_credential = Credential::new("123".to_string(), "456".to_string());
     // Success scenario
@@ -265,7 +264,7 @@ mod tests {
 
   #[test]
   fn test_get_live_info_by_user() {
-    let agent = reqwest::blocking::Client::new();
+    let agent = Client::new();
     let credential = get_credential_for_test_or_abort();
     let invalid_credential = Credential::new("123".to_string(), "456".to_string());
     // Success scenario

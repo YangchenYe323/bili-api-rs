@@ -2,9 +2,9 @@
 
 use std::collections::HashMap;
 
-use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 
+use crate::client::Client;
 use crate::utils::handle_api_response;
 
 /// 默认错误码
@@ -365,12 +365,11 @@ pub fn get_live_room_play_info(
 
 #[cfg(test)]
 mod tests {
-  use crate::utils::assert_error_code;
-
   use super::*;
+  use crate::utils::assert_error_code;
   #[test]
   fn test_get_live_room_info() {
-    let agent = reqwest::blocking::Client::new();
+    let agent = Client::new();
     let result = get_live_room_info(&agent, 21887355);
     assert!(result.is_ok());
     // Success: a valid live room
@@ -384,7 +383,7 @@ mod tests {
 
   #[test]
   fn test_get_room_init_info() {
-    let agent = reqwest::blocking::Client::new();
+    let agent = Client::new();
     // Success: a valid live room
     assert!(get_room_init_info(&agent, 1029).is_ok());
     // Failure: non-existent live room
@@ -398,7 +397,7 @@ mod tests {
     const VALID_UID: Uid = 697737710;
     const INVALID_UID: Uid = 0;
 
-    let agent = reqwest::blocking::Client::new();
+    let agent = Client::new();
     // Success: a valid uid
     assert!(get_streamer_info(&agent, VALID_UID).is_ok());
     // Failure: non-existent uid
@@ -412,7 +411,7 @@ mod tests {
     const UID2: Uid = 540564177;
     const INVALID_UID: Uid = 44444444;
 
-    let agent = reqwest::blocking::Client::new();
+    let agent = Client::new();
     let uids = [UID1, UID2];
     let invalid_uids = [INVALID_UID];
     // Success: a valid uid
@@ -428,7 +427,7 @@ mod tests {
   // TODO: Refactor play info api
   #[test]
   fn test_get_live_room_play_info() {
-    let agent = reqwest::blocking::Client::new();
+    let agent = Client::new();
     println!(
       "{:?}",
       get_live_room_play_info(
