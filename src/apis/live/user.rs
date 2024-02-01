@@ -66,7 +66,7 @@ pub fn get_medal_for_user(
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
-pub struct WearMedalResponse;
+pub struct WearMedalResponse {}
 
 pub fn wear_medal(
   client: &Client,
