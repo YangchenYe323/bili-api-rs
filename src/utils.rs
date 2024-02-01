@@ -30,7 +30,7 @@ pub fn handle_api_response<T: DeserializeOwned>(
     (code, message)
   };
   match (code, message) {
-    (0, x) if indicates_success(&x) => serde_json::from_value(value).map_err(crate::Error::from),
+    (0, _) => serde_json::from_value(value).map_err(crate::Error::from),
     (code, x) => Err(crate::Error::Api(ApiError::new(code as i32, x))),
   }
 }
@@ -45,9 +45,4 @@ pub fn assert_error_code<T: std::fmt::Debug>(result: crate::Result<T>, code: i32
       panic!("Expect Api Error, got {:?}", it);
     }
   }
-}
-
-#[inline(always)]
-fn indicates_success(msg: &str) -> bool {
-  matches!(msg, "" | "0" | "success" | "ok")
 }

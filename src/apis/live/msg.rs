@@ -50,7 +50,7 @@ pub struct LiveMessageConfig {
   mode: LiveMessageMode,
   /// 气泡 (意义不明)
   bubble: i32,
-  /// 当前时间戳，由callee提供
+  /// 当前时间戳，由被调用方库函数提供
   pub(crate) rnd: String,
   /// CSRF: bili_jct
   pub(crate) csrf: String,
@@ -60,6 +60,7 @@ pub struct LiveMessageConfig {
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct SendLiveMessageResponse {
+  pub message: String,
   pub data: SendLiveMessageData,
 }
 
