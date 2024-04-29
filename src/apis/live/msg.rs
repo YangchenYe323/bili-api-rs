@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::client::Client;
+use crate::Error;
 use crate::{credential::Credential, error::ApiError, utils::handle_api_response};
 
 pub const DEFAULT_FONTSIZE: i32 = 25;
@@ -51,6 +52,7 @@ pub struct LiveMessageConfig {
   /// 气泡 (意义不明)
   bubble: i32,
   /// @用户MID
+  #[serde(skip_serializing_if = "Option::is_none")]
   reply_mid: Option<i64>,
   /// 当前时间戳，由被调用方库函数提供
   pub(crate) rnd: String,
@@ -162,27 +164,42 @@ pub fn send_live_message(
   credential: &Credential,
 ) -> crate::Result<SendLiveMessageResponse> {
   const API_URL: &str = "https://api.live.bilibili.com/msg/send";
-  let rnd = SystemTime::now()
-    .duration_since(UNIX_EPOCH)
-    .unwrap()
-    .as_millis()
-    .to_string();
 
-  config.rnd = rnd;
-  config.csrf = credential.bili_jct.clone();
-  config.csrf_token = credential.bili_jct.clone();
+  let mut result = None;
+  for _ in 0..=client.live_msg_config.max_retry {
+    let rnd = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_millis()
+      .to_string();
 
-  let request = client
-    .post(API_URL)
-    .header("cookie", credential.to_cookie_str())
-    .form(&config)
-    .header("User-Agent", crate::apis::USER_AGENT)
-    .build()?;
+    config.rnd = rnd;
+    config.csrf = credential.bili_jct.clone();
+    config.csrf_token = credential.bili_jct.clone();
 
-  // B站直播弹幕API限制过快发送弹幕, 在此处做限流
-  client.block_till_ready();
+    let request = client
+      .post(API_URL)
+      .header("cookie", credential.to_cookie_str())
+      .form(&config)
+      .header("User-Agent", crate::apis::USER_AGENT)
+      .build()?;
 
-  handle_api_response(client.execute(request)?)
+    // B站直播弹幕API限制过快发送弹幕, 在此处做限流
+    client.block_till_ready();
+
+    result = Some(handle_api_response(client.execute(request)?));
+
+    if let Some(Err(Error::Api(e))) = &result {
+      if e.message().contains("您发送弹幕的频率过快") {
+        std::thread::sleep(client.live_msg_config.retry_after_rate_limit);
+        continue;
+      }
+    }
+
+    break;
+  }
+
+  result.unwrap()
 }
 
 /// 获取当前API错误对应的禁言粉丝牌等级, 若当前错误不是粉丝牌等级禁言则返回None
@@ -220,7 +237,6 @@ mod tests {
     // 正常发送弹幕成功
     let result = send_live_message(&agent, config, &credential);
     assert!(result.is_ok());
-    std::thread::sleep(Duration::from_millis(500));
 
     // 用户登录错误
     let invalid_cred = get_fake_credential();
@@ -237,15 +253,11 @@ mod tests {
     config.fontsize(0);
     let result = send_live_message(&agent, config, &credential);
     assert_error_code(result, REQUEST_ERROR);
-  }
 
-  #[test]
-  pub fn test_reply() {
-    let agent = Client::new();
-    let credential = get_credential_for_test_or_abort();
+    std::thread::sleep(Duration::from_millis(500));
+
     let config = LiveMessageConfig::with_roomid_and_msg_reply(1029, "加油".to_string(), 12734361);
-
-    // 正常发送弹幕成功
+    // @弹幕
     let result = send_live_message(&agent, config, &credential);
     assert!(result.is_ok());
   }

@@ -11,13 +11,15 @@ use reqwest::{
   IntoUrl,
 };
 
-use self::rate_limiting::RateLimiter;
+use self::{config::LiveMsgConfig, rate_limiting::RateLimiter};
 
+mod config;
 mod rate_limiting;
 
 #[derive(Clone)]
 pub struct Client {
   inner: ClientInner,
+  pub(crate) live_msg_config: LiveMsgConfig,
 }
 
 impl Client {
@@ -34,7 +36,10 @@ impl Client {
       rate_limiter: Arc::new(Mutex::new(rate_limiter)),
     };
 
-    Self { inner }
+    Self {
+      inner,
+      live_msg_config: LiveMsgConfig::with_duration_and_retry(Duration::from_secs(3), 1),
+    }
   }
 }
 
