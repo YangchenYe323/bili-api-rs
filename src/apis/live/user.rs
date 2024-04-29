@@ -258,7 +258,7 @@ mod tests {
     // Failure scenario
     assert_error_code(
       get_last_month_live_checkin_info(&agent, &invalid_credential),
-      -101,
+      REQUEST_ERROR,
     );
   }
 

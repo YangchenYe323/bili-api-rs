@@ -50,6 +50,8 @@ pub struct LiveMessageConfig {
   mode: LiveMessageMode,
   /// 气泡 (意义不明)
   bubble: i32,
+  /// @用户MID
+  reply_mid: Option<i64>,
   /// 当前时间戳，由被调用方库函数提供
   pub(crate) rnd: String,
   /// CSRF: bili_jct
@@ -91,6 +93,7 @@ impl LiveMessageConfig {
       fontsize: DEFAULT_FONTSIZE,
       mode: LiveMessageMode::Float,
       bubble: 0,
+      reply_mid: None,
       rnd: String::new(),
       csrf: String::new(),
       csrf_token: String::new(),
@@ -105,6 +108,22 @@ impl LiveMessageConfig {
       fontsize: DEFAULT_FONTSIZE,
       mode: LiveMessageMode::Float,
       bubble: 0,
+      reply_mid: None,
+      rnd: String::new(),
+      csrf: String::new(),
+      csrf_token: String::new(),
+    }
+  }
+
+  pub fn with_roomid_and_msg_reply(room_id: i32, msg: String, reply_mid: i64) -> LiveMessageConfig {
+    Self {
+      roomid: room_id,
+      msg,
+      color: WHITE,
+      fontsize: DEFAULT_FONTSIZE,
+      mode: LiveMessageMode::Float,
+      bubble: 0,
+      reply_mid: Some(reply_mid),
       rnd: String::new(),
       csrf: String::new(),
       csrf_token: String::new(),
@@ -218,6 +237,17 @@ mod tests {
     config.fontsize(0);
     let result = send_live_message(&agent, config, &credential);
     assert_error_code(result, REQUEST_ERROR);
+  }
+
+  #[test]
+  pub fn test_reply() {
+    let agent = Client::new();
+    let credential = get_credential_for_test_or_abort();
+    let config = LiveMessageConfig::with_roomid_and_msg_reply(1029, "加油".to_string(), 12734361);
+
+    // 正常发送弹幕成功
+    let result = send_live_message(&agent, config, &credential);
+    assert!(result.is_ok());
   }
 
   #[test]
