@@ -211,7 +211,12 @@ pub fn get_guard_level_threshold(err: &ApiError) -> Option<i32> {
 
   let re = Regex::new(r"^主播对粉丝勋章([0-9]+)以下开启了禁言，等待主播解除~$").unwrap();
   let mat = re.captures(err.message())?;
-  let level = i32::from_str_radix(mat.get(1).unwrap().as_str(), 10).expect("Cannot parse as i32");
+  let level: i32 = mat
+    .get(1)
+    .unwrap()
+    .as_str()
+    .parse()
+    .expect("Cannot parse as i32");
   Some(level)
 }
 

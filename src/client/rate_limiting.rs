@@ -19,17 +19,13 @@ impl RateLimiter {
 impl RateLimiter {
   /// Blocks until next available
   pub fn block_till_ready(&mut self) {
-    match self.last_call.as_mut() {
-      Some(last_call) => {
-        let mut elapsed = last_call.elapsed();
-        while elapsed < self.time_limit {
-          std::thread::sleep(self.time_limit - elapsed);
-          elapsed = last_call.elapsed();
-        }
+    if let Some(last_call) = self.last_call.as_mut() {
+      let mut elapsed = last_call.elapsed();
+      while elapsed < self.time_limit {
+        std::thread::sleep(self.time_limit - elapsed);
+        elapsed = last_call.elapsed();
       }
-      None => (),
     }
-
     self.last_call = Some(Instant::now());
   }
 }

@@ -136,6 +136,8 @@ pub fn fetch_nav_info(client: &Client, credential: &Credential) -> crate::Result
 
 #[cfg(test)]
 mod tests {
+  use std::path::Path;
+
   use super::*;
   use crate::credential::extract_credential::get_credential_for_test_or_abort;
   #[test]
@@ -145,6 +147,32 @@ mod tests {
 
     let result = fetch_nav_info(&agent, &cred);
 
-    assert!(result.is_ok())
+    assert!(result.is_ok());
+
+    let result = result.unwrap();
+    let webimg = result.data.wbi_img;
+    let img_url = webimg.img_url;
+    let sub_url = webimg.sub_url;
+
+    println!("{}", img_url);
+    println!("{}", sub_url);
+
+    let img_url = url::Url::parse(&img_url).unwrap();
+    let sub_url = url::Url::parse(&sub_url).unwrap();
+
+    println!("{:?}\n{:?}", img_url, sub_url);
+
+    let img_key = Path::new(img_url.path())
+      .file_stem()
+      .unwrap()
+      .to_str()
+      .unwrap();
+    let sub_key = Path::new(sub_url.path())
+      .file_stem()
+      .unwrap()
+      .to_str()
+      .unwrap();
+
+    println!("{}\n{}", img_key, sub_key);
   }
 }

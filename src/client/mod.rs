@@ -22,6 +22,12 @@ pub struct Client {
   pub(crate) live_msg_config: LiveMsgConfig,
 }
 
+impl Default for Client {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl Client {
   pub fn new() -> Self {
     const DEFAULT_LIMIT: Duration = Duration::from_millis(1000);

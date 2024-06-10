@@ -1,5 +1,5 @@
 //! Utilities
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Deserializer};
 use serde_json::Value;
 
 use crate::error::ApiError;
@@ -13,6 +13,10 @@ pub fn handle_api_response<T: DeserializeOwned>(
   response: reqwest::blocking::Response,
 ) -> crate::Result<T> {
   let value: Value = response.json().expect("Response has to be JSON formatted");
+
+  // uncomment this line when debugging :)
+  // println!("{}", serde_json::to_string_pretty(&value).unwrap());
+
   let (code, message) = {
     // We know that the response has to be
     let obj = value.as_object().expect("Response has to be JSON object");
@@ -44,5 +48,29 @@ pub fn assert_error_code<T: std::fmt::Debug>(result: crate::Result<T>, code: i32
     it => {
       panic!("Expect Api Error, got {:?}", it);
     }
+  }
+}
+
+/// A helper utility that deserializes empty object as None
+pub fn non_empty_json_obj<'de, D: Deserializer<'de>, T: DeserializeOwned>(
+  d: D,
+) -> Result<Option<T>, D::Error> {
+  use serde::Deserialize;
+  let o: Option<Value> = Option::deserialize(d)?;
+
+  let Some(val) = o else {
+    return Ok(None);
+  };
+
+  if val.is_object() {
+    let obj = val.as_object().unwrap();
+    if obj.is_empty() {
+      return Ok(None);
+    }
+  }
+
+  match serde_json::from_value(val) {
+    Ok(res) => Ok(Some(res)),
+    Err(_e) => Ok(None),
   }
 }
